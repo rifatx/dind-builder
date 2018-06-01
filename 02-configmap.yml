@@ -1,7 +1,7 @@
 kind: ConfigMap
 metadata:
   name: dind-script
-  namespace: jenkins
+  namespace: builder
 apiVersion: v1
 data:
   run.sh: |-
