@@ -1,0 +1,22 @@
+kind: ConfigMap
+metadata:
+  name: dind-script
+  namespace: jenkins
+apiVersion: v1
+data:
+  run.sh: |-
+    #!/bin/sh
+    while true
+    do
+      DOCKER_HOST="tcp://localhost:2375"
+      N=$(docker --host=$DOCKER_HOST ps -q | wc -l)
+      if [ "$N" -eq "0" ];then
+        echo "[`date`] pruning..."
+        docker --host=$DOCKER_HOST system prune -f
+        sleep 3600
+      else
+        echo -e "[`date`] process(es) running:\n`docker --host=$DOCKER_HOST ps`\n"
+        echo "waiting..."
+        sleep 300
+      fi
+    done

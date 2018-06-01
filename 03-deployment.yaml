@@ -1,0 +1,60 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  namespace: jenkins
+  name: dind
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: dind
+  serviceName: dind
+  template:
+    metadata:
+      labels:
+        app: dind
+    spec:
+      containers:
+      - name: docker
+        image: docker:18.05-dind
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 2375
+        volumeMounts:
+        - name: docker-data
+          mountPath: /var/lib/docker
+        resources:
+          requests:
+            memory: 16Mi
+            cpu: 5m
+          limits:
+            memory: 2048Mi
+            cpu: 800m 
+      - name: docker-client
+        image: docker:18.05
+        command: ['/bin/sh', '/etc/init/run.sh']
+        volumeMounts:
+        - name: dind-script
+          mountPath: /etc/init
+        resources:
+          requests:
+            memory: 16Mi
+            cpu: 5m
+          limits:
+            memory: 256Mi
+            cpu: 200m
+      volumes:
+      - name: dind-script
+        configMap:
+          name: dind-script
+  volumeClaimTemplates:
+  - metadata:
+      name: docker-data
+      annotations:
+        volume.beta.kubernetes.io/storage-class: hdd
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi

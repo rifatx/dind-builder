@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: jenkins
+  labels:
+    app: dind
+  name: docker
+spec:
+  clusterIP: None
+  ports:
+    - name: docker-host
+      port: 2375
+  selector:
+    app: dind
